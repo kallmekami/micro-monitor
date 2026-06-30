@@ -265,3 +265,4 @@ another and only interact through Redis pub/sub channels, which
 satisfies the core principle of microservice architecture: services
 should be independently deployable and should not require knowledge
 of each other's internal implementation or location.
+<img width="952" height="455" alt="image" src="https://github.com/user-attachments/assets/38dd68b2-264b-4288-8779-af27b0bbac7b" />
