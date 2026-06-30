@@ -1,3 +1,5 @@
+[فارسی 🇮🇷](README_FA.md) | English
+
 # Micro Monitor
 
 A small distributed system project that monitors CPU and RAM usage of a
