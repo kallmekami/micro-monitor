@@ -1,0 +1,66 @@
+version: "3.9"
+
+# three custom services + redis as the message broker between them.
+# nothing here talks to anything else directly, it all goes through redis.
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: mm-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - mm-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  collector:
+    build: ./collector
+    container_name: mm-collector
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - COLLECT_INTERVAL=2
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - mm-net
+    # reads host machine stats instead of just the container's own.
+    # remove this line if you only care about the container itself
+    pid: host
+
+  alert:
+    build: ./alert
+    container_name: mm-alert
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CPU_THRESHOLD=80
+      - RAM_THRESHOLD=85
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - mm-net
+
+  dashboard:
+    build: ./dashboard
+    container_name: mm-dashboard
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - mm-net
+    stdin_open: true
+    tty: true
+
+networks:
+  mm-net:
+    driver: bridge
